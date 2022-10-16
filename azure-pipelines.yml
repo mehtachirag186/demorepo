@@ -1,0 +1,36 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- task: TerraformTaskV2@2
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'azuredevops-azure-tf-connection'
+    backendAzureRmResourceGroupName: 'rg-remote-state-tf'
+    backendAzureRmStorageAccountName: 'azuredevopsremotestatetf'
+    backendAzureRmContainerName: 'azuredevopsremotestatetf'
+    backendAzureRmKey: 'remotestate.tfstate'
+
+- task: TerraformTaskV2@2
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    environmentServiceNameAzureRM: 'Free Trial(d269918c-3797-49c4-b125-b1bc5815ad18)'
+
+- task: TerraformTaskV3@3
+  inputs:
+    provider: 'azurerm'
+    command: 'destroy'
+    environmentServiceNameAzureRM: 'Free Trial(d269918c-3797-49c4-b125-b1bc5815ad18)'
